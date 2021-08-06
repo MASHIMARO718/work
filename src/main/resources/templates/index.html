@@ -35,23 +35,26 @@
     let websocket = null;
     //判断当前浏览器是否支持WebSocket   ws://iwecloud17:31199/wec-counselor-apps/api/websocket/
     if ('WebSocket' in window) {
+        //x上限，y下限
+        var x = 100;
+        var y = 0;
+        var rand = parseInt(Math.random() * (x - y + 1) + y);
         websocket = new WebSocket(
             (window.location.protocol === 'https:' ? 'wss://' : 'ws://') +
             window.location.host +
-            '/work/api/websocket/123'
+            '/work/api/websocket/' + rand
         );
     } else {
         alert('当前浏览器 Not support websocket');
     }
     websocket.onmessage = (event) => {
-        $('#comment').innerText(event.data);
+        $('#comment').append("<span>"+event.data+"</span><br/>")
     };
 
     //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
     window.onbeforeunload = function() {
         websocket.close();
     };
-
 
     function test(){
         const params = {
@@ -65,10 +68,8 @@
             contentType:"application/json",
             dataType:"json",
             success:function(data){
-                alert('提交成功！');
             }
         })
     }
-
 </script>
 </html>
