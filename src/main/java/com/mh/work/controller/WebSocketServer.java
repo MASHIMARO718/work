@@ -1,5 +1,7 @@
 package com.mh.work.controller;
 
+import com.alibaba.fastjson.JSONObject;
+import com.mh.work.bean.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -9,6 +11,7 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -36,7 +39,7 @@ public class WebSocketServer {
         this.sid = sid;
         addOnlineCount();           //在线数加1
         try {
-            sendMessage("conn_success");
+            sendInfo(JSONObject.toJSONString(Message.builder().type(0).msg("当前在线人数："+getOnlineCount()).user(webSocketSet.stream().map(c->c.sid).collect(Collectors.toList())).build()),null);
             log.info("有新窗口开始监听:" + sid + ",当前在线人数为:" + getOnlineCount());
         } catch (IOException e) {
             log.error("websocket IO Exception");
@@ -54,6 +57,11 @@ public class WebSocketServer {
         log.info("释放的sid为："+sid);
         //这里写你 释放的时候，要处理的业务
         log.info("有一连接关闭！当前在线人数为" + getOnlineCount());
+        try {
+            sendInfo(JSONObject.toJSONString(Message.builder().type(0).msg("当前在线人数："+getOnlineCount()).user(webSocketSet.stream().map(c->c.sid).collect(Collectors.toList())).build()),null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 

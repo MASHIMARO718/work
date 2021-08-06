@@ -1,6 +1,10 @@
 package com.mh.work.controller;
 
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.mh.work.bean.Comment;
+import com.mh.work.bean.Message;
 import com.mh.work.entity.BaseUser;
 import com.mh.work.entity.WorkComment;
 import com.mh.work.mapper.CommentMapper;
@@ -12,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -34,7 +39,7 @@ public class CommentController {
         BeanUtils.copyProperties(comment,workComment);
         commentMapper.insert(workComment);
         try {
-            WebSocketServer.sendInfo(comment.getSomething(),null);
+            WebSocketServer.sendInfo(JSONObject.toJSONString(Message.builder().type(1).msg(DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss ")+comment.getName()+"："+comment.getSomething()).build()),null);
         } catch (IOException e) {
             e.printStackTrace();
         }
