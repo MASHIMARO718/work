@@ -17,5 +17,8 @@ public class BaseController {
     public String toIndex(){
         return "index";
     }
-
+    @RequestMapping("/chat")
+    public String toChat(){
+        return "chat";
+    }
 }

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="/work/http_ajax.aspnetcdn.com_ajax_jQuery_jquery-1.8.0.js"></script>
+</head>
+<style>
+    .button {
+        background-color: #4CAF50; /* Green */
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        border-radius: 5px;
+    }
+</style>
+<body>
+    <div id="love" style="width: 60%;padding-top: 10%;float: left">
+        <table style="margin: auto">
+            <tr>
+                <td><label for="name">昵称</label></td><td><input id="name" placeholder="请输入昵称"> <button class="button" id="addLine" onclick="addLine()">连接</button></td>
+            </tr>
+            <tr>
+                <td><label for="something">说点什么</label></td><td><textarea id="something" cols="50" rows="5"></textarea> <button class="button" id="submit" onclick="submit()">提交</button>
+            </td>
+            </tr>
+            <tr>
+                <td colspan="3" id="comment" ></td>
+            </tr>
+        </table>
+    </div>
+    <div style="padding-top: 10%;float: left">
+        <table  style="margin: auto;height: 100%;overflow-y: scroll">
+            <thead>
+            <tr>
+                <td id="onlineNum"></td>
+            </tr>
+            </thead>
+            <tbody id="user">
+
+            </tbody>
+
+        </table>
+    </div>
+</body>
+<script>
+    let websocket = null;
+    //判断当前浏览器是否支持WebSocket   ws://iwecloud17:31199/wec-counselor-apps/api/websocket/
+    function addLine() {
+        let name = $('#name').val().trim();
+        if(name === ''){
+            alert("请先输入昵称");return;
+        }
+        $('#name').attr("disabled",true);
+        $('#addLine').remove();
+        if ('WebSocket' in window) {
+            //x上限，y下限
+            var x = 100;
+            var y = 0;
+            var rand = parseInt(Math.random() * (x - y + 1) + y);
+            websocket = new WebSocket(
+                (window.location.protocol === 'https:' ? 'wss://' : 'ws://') +
+                window.location.host +
+                '/work/api/websocket/' + name+"-"+rand
+            );
+        } else {
+            alert('当前浏览器 Not support websocket');
+        }
+        websocket.onmessage = (event) => {
+            var obj = JSON.parse(event.data);
+            if(obj.type === 0){
+                $('#onlineNum').html("<span>"+obj.msg+"</span>");
+                $('#user').html("");
+                var users = Array.from(obj.user);
+                users.forEach(function (e) {
+                    console.log(e);
+                    $('#user').append("<tr><td>"+e.split('-')[0]+"</td></tr>");
+                })
+            }else {
+                $('#comment').prepend("<span>"+obj.msg+"</span><br/>")
+            }
+        };
+        //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+        window.onbeforeunload = function() {
+            websocket.close();
+        };
+    }
+    function submit(){
+        const params = {
+            name: $('#name').val(),
+            something: $('#something').val()
+        };
+        if(websocket == null){
+            alert("请先建立连接");return;
+        }
+        if(params.something === ''){
+            alert("请输入点东西");return;
+        }
+        $.ajax({
+            url:"/work/comment/save",
+            type:"post",
+            data:JSON.stringify(params),
+            contentType:"application/json",
+            dataType:"json",
+            success:function(data){
+                $('#something').val('');
+            }
+        })
+    }
+</script>
+</html>
