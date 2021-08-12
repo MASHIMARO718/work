@@ -56,14 +56,10 @@
         $('#name').attr("disabled",true);
         $('#addLine').remove();
         if ('WebSocket' in window) {
-            //x上限，y下限
-            var x = 100;
-            var y = 0;
-            var rand = parseInt(Math.random() * (x - y + 1) + y);
             websocket = new WebSocket(
                 (window.location.protocol === 'https:' ? 'wss://' : 'ws://') +
                 window.location.host +
-                '/work/api/websocket/' + name+"-"+rand
+                '/work/api/websocket/' + name+"-"+guid()
             );
         } else {
             alert('当前浏览器 Not support websocket');
@@ -108,6 +104,13 @@
                 $('#something').val('');
             }
         })
+    }
+    function guid() {
+        return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0,
+                v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
     }
 </script>
 </html>
