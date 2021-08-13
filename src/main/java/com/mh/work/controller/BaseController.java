@@ -21,4 +21,9 @@ public class BaseController {
     public String toChat(){
         return "chat";
     }
+
+    @RequestMapping("/qiXi")
+    public String toQiXi(){
+        return "qixi";
+    }
 }
